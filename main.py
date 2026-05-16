@@ -3,9 +3,11 @@ from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 
 from schema.form_submission import LeadInput
+from services.web_scraper import scrape_company_data
 
 app = FastAPI()
 
+# Allowing cross communication for * only
 app.add_middleware(
     CORSMiddleware,
     allow_origins=['*'],
@@ -22,4 +24,5 @@ def home(request: Request):
 
 @app.post('/submit-lead')
 def submit_lead(lead : LeadInput):
-    print(LeadInput)
+    data = scrape_company_data(lead.url)
+    print(data)
