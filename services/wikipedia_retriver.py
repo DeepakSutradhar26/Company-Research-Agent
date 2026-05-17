@@ -7,9 +7,7 @@ def search_company_name(company_name: str):
     company_name = company_name.lower()
 
     try:
-        query = f'Find information regarding this company named {company_name}'
-
-        docs = retriver.invoke(query)
+        docs = retriver.invoke(company_name)
 
         return {
             'success': True,

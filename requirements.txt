@@ -1,3 +1,4 @@
+re
 fastapi==0.111.0
 langchain-community
 wikipedia

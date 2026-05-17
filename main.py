@@ -5,6 +5,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from schema.form_submission import LeadInput
 from services.web_scraper import scrape_company_data
 from services.wikipedia_retriver import search_company_name
+from services.llm_pipeline import llm_report
 
 app = FastAPI()
 
@@ -27,9 +28,10 @@ def home(request: Request):
 def submit_lead(lead : LeadInput):
     try:
         res1 = scrape_company_data(lead.url) 
+        print('Scraping Completed')
         res2 = search_company_name(lead.company)
-        print(res2)
+        print('Scearch Completed')
+        res3 = llm_report(res1['text'], res2['text'])
+        print('Report...\n' + res3['report'])
     except Exception as e:
         return HTTPException(status_code=500, detail=str(e))
-    # report = llm_report(response1.text, response2.text)
-    
