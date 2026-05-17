@@ -9,41 +9,59 @@ from dotenv import load_dotenv
 load_dotenv()
 
 def send_email(to: str, name: str, company: str, pdf_path: str):
-    try:
-        sender = os.getenv('EMAIL')
-        password = os.getenv('EMAIL_PASSWORD')
+    sender = os.getenv('EMAIL')
+    password = os.getenv('EMAIL_PASSWORD')
 
+    try:
         msg = MIMEMultipart()
+        body = MIMEText(f"""Hi {name},
+
+        This is your requested company intelligence report for {company}.
+
+        The detailed analysis is attached as a PDF file.
+
+        It includes:
+        - Company overview
+        - Key insights
+        - Web and public data summary
+        - AI-generated analysis report
+
+        Please review the attachment for full details.
+
+        Regards,
+        Company-Research-Agent
+        """)
+        msg.attach(body)
         msg['From'] = sender
         msg['To'] = to
         msg['Subject'] = f'Your Company Intelligence Report - {company}'
 
-        body = f"""Hi {name},
-
-Thank you for your interest in SimplifIQ.
-
-Please find attached your personalized intelligence report for {company}.
-
-Best regards,
-SimplifIQ Team"""
-
-        msg.attach(MIMEText(body, 'plain'))
-
         # Attach PDF
-        with open(pdf_path, 'rb') as f:
-            attachment = MIMEBase('application', 'octet-stream')
+        with open(pdf_path, "rb") as f:
+            attachment = MIMEBase("application", "octet-stream")
             attachment.set_payload(f.read())
-            encoders.encode_base64(attachment)
-            attachment.add_header('Content-Disposition', f'attachment; filename={os.path.basename(pdf_path)}')
-            msg.attach(attachment)
 
-        # Send
-        with smtplib.SMTP('smtp.gmail.com', 587) as server:
-            server.starttls()
-            server.login(sender, password)
-            server.sendmail(sender, to, msg.as_string())
+        encoders.encode_base64(attachment)
 
-        return {'success': True}
+        filename = os.path.basename(pdf_path)
+        attachment.add_header(
+            "Content-Disposition",
+            f"attachment; filename={filename}"
+        )
 
+        msg.attach(attachment)
+
+        server = smtplib.SMTP('smtp.gmail.com', 587)
+        server.starttls()
+        server.login(sender, password)
+        server.sendmail(sender, to, msg.as_string())
+        server.quit()
+
+        return {
+            'success': True
+        }
     except Exception as e:
-        return {'success': False, 'message': str(e)}
+        return {
+            'success': False,
+            'message': str(e)
+        }

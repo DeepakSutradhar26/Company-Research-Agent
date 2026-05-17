@@ -21,7 +21,7 @@ class AuditInsights(BaseModel):
 # Pydantic for output parser
 class LeadResponse(BaseModel):
     intelligence: CompanyIntelligence
-    audut: AuditInsights
+    audit: AuditInsights
     report_status: Literal['generated', 'failed', 'partial'] = 'generated'
     pdf_path: Optional[str] = None
     drive_url: Optional[str] = None
