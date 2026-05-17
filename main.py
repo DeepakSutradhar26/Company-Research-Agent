@@ -8,7 +8,7 @@ from services.wikipedia_retriver import search_company_name
 from services.llm_pipeline import llm_report
 from services.pdf_report import generate_pdf
 from services.email import send_email
-# from services.bonus import log_to_sheets, upload_to_drive
+from services.bonus import log_to_sheets, upload_to_drive
 
 app = FastAPI()
 
@@ -53,9 +53,12 @@ def submit_lead(lead : LeadInput):
             pdf_path=pdf_result['path']
         )
 
-        # log_to_sheets(lead, report, pdf_result['path'])
+        # drive_result = upload_to_drive(pdf_result['path'])
 
-        # drive_url = upload_to_drive(pdf_result['path'])
+        # if not drive_result.get('success'):
+        #     raise Exception(f"Drive upload failed: {drive_result.get('message')}")
+
+        log_to_sheets(lead, pdf_result['path'])
 
         return {
             'success': True,
@@ -63,4 +66,6 @@ def submit_lead(lead : LeadInput):
         }
 
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
