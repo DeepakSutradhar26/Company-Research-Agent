@@ -19,19 +19,37 @@ model = ChatGroq(
 )
 
 # Letting LLM first generate a prompt which can be passed to generate the report
-def llm_report(text1: str, text2: str):
+def llm_report(scraped_text: str, wiki_content: str):
     try:
         parser = PydanticOutputParser(pydantic_object=LeadResponse)
 
         template = PromptTemplate(
-            template='Create a report from either from text1 and text2 given or internet text1: {text1} and text2: {text2} as {format_instructions}',
-            input_variables=['text1', 'text2'],
+            template="""You are a senior business analyst preparing a personalized company intelligence report for a prospect who just submitted a lead form.
+
+        Your goal is to create a highly curated, professional, and insightful report that demonstrates deep understanding of their business.
+
+        Use the following data sources:
+        - Website Content: {scraped_text}
+        - Wikipedia / Public Info: {wiki_content}
+
+        If either source is empty or insufficient, infer intelligently from the other source or from your own knowledge about the company and its industry.
+
+        Instructions:
+        - Tailor every section specifically to this company — no generic filler
+        - Identify their core business model, target market, and value proposition
+        - Highlight real challenges and opportunities relevant to their domain
+        - Use professional business language
+        - Be specific, not vague — mention actual products, services, or initiatives if known
+        - The report should feel like it was written by a consultant who researched this company thoroughly
+
+        {format_instructions}""",
+            input_variables=['scraped_text', 'wiki_content'],
             partial_variables={'format_instructions': parser.get_format_instructions()}
         )
 
         chain = template | model | parser
 
-        report = chain.invoke({'text1': text1, 'text2': text2})
+        report = chain.invoke({'scraped_text': scraped_text, 'wiki_content': wiki_content})
 
         return {
             'success': True,

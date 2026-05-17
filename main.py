@@ -30,31 +30,28 @@ def home(request: Request):
 # So many request/response only for readability
 @app.post('/submit-lead')
 def submit_lead(lead : LeadInput):
-    print(lead)
     try:
-        print('working')
         res1 = scrape_company_data(lead.url) 
         res2 = search_company_name(lead.company)
-        res3 = llm_report(res1['text'] if res1['success'] else '', 
-            res2['text'] if res2['success'] else '')
-        
-        print('report generated')
 
+        scraped_text = res1.get('text', '') if res1.get('success') else ''
+        wiki_text = res2.get('text', '') if res2.get('success') else ''
+
+        res3 = llm_report(scraped_text, wiki_text)
+
+        if not res3.get('success'):
+            raise Exception(f"Report generation failed: {res3.get('message')}")
+        
         report = res3['report']
 
         pdf_result = generate_pdf(lead, report)
 
-        print('pdf saved')
-        print('again port error')
-
-        email_res = send_email(
+        _ = send_email(
             to=lead.email,
             name=lead.name,
             company=lead.company,
             pdf_path=pdf_result['path']
         )
-
-        print(email_res)
 
         # log_to_sheets(lead, report, pdf_result['path'])
 
