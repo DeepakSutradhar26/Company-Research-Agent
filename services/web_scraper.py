@@ -1,6 +1,10 @@
 import requests
 from bs4 import BeautifulSoup
 
+# The problem I came accross while working with scraped text is that
+# Long paragraph text may exhaust LLM tokens
+# So I'm using both wikipedia retriver and scraped text
+# Then I will create a pipeline to only pass around less than 8k chars to LLM
 def scrape_company_data(url: str):
     if url is None:
         return ''
@@ -19,11 +23,13 @@ def scrape_company_data(url: str):
 
         soup = BeautifulSoup(html, 'html.parser')
 
+        # Remove unimportant tags
         for tag in soup(['script', 'style']):
             tag.decompose()
             
         content = []
 
+        # Extract text from useful tags
         for tag in soup(['h1', 'h2', 'h3', 'p', 'span', 'li']):
             text = soup.get_text(separator=' ', strip=True)
 
@@ -31,7 +37,10 @@ def scrape_company_data(url: str):
 
         final_text = '\n'.join(content)
 
-        return final_text
+        return {
+            'success': True,
+            'text': final_text
+        }
     except Exception as e:
         return {
             'success':False,
