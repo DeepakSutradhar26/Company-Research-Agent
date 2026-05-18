@@ -15,7 +15,11 @@ app = FastAPI()
 # Allowing cross communication for * only
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=['*'],
+    allow_origins=[
+        'https://company-research-agent-production-e45b.up.railway.app',
+        'http://127.0.0.1:8000',
+        '*'
+    ],
     allow_credentials=True,
     allow_methods=['*'],
     allow_headers=['*']
@@ -46,19 +50,27 @@ def submit_lead(lead : LeadInput):
 
         pdf_result = generate_pdf(lead, report)
 
-        _ = send_email(
+        email_result = send_email(
             to=lead.email,
             name=lead.name,
             company=lead.company,
             pdf_path=pdf_result['path']
         )
 
-        drive_result = upload_to_drive(pdf_result['path'])
+        if not email_result.get('success'):
+            raise Exception(f"Email failed: {email_result.get('message')}")
 
-        if not drive_result.get('success'):
-            raise Exception(f"Drive upload failed: {drive_result.get('message')}")
+        try:
+            drive_result = upload_to_drive(pdf_result['path'])
+            drive_url = drive_result.get('url', '') if drive_result.get('success') else ''
+        except Exception as e:
+            print(f'Drive upload skipped: {e}')
+            drive_url = ''
 
-        log_to_sheets(lead, drive_result['url'])
+        try:
+            log_to_sheets(lead, drive_url or pdf_result['path'])
+        except Exception as e:
+            print(f'Sheets logging skipped: {e}')
 
         return {
             'success': True,

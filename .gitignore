@@ -1,5 +1,9 @@
-venv/
+credentials.json
+oauth_credentials.json
+token.pickle
 .env
+reports/
 __pycache__/
-*.json
-*.pickle
+*.pyc
+.venv/
+venv/

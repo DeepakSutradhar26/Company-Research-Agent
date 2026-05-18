@@ -2,6 +2,8 @@
 
 SimplifIQ is a FastAPI-based AI system that generates structured company intelligence reports from a lead form submission. It collects data from a company website and Wikipedia, processes it using an LLM, and delivers a formatted PDF report via email.
 
+> ## NOTE: Railway free plan doesn't allow Google SMTP (port 587) connections
+
 ## Features
 
 - Lead form submission (name, email, company, website)
