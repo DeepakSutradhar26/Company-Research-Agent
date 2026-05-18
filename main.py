@@ -53,12 +53,12 @@ def submit_lead(lead : LeadInput):
             pdf_path=pdf_result['path']
         )
 
-        # drive_result = upload_to_drive(pdf_result['path'])
+        drive_result = upload_to_drive(pdf_result['path'])
 
-        # if not drive_result.get('success'):
-        #     raise Exception(f"Drive upload failed: {drive_result.get('message')}")
+        if not drive_result.get('success'):
+            raise Exception(f"Drive upload failed: {drive_result.get('message')}")
 
-        log_to_sheets(lead, pdf_result['path'])
+        log_to_sheets(lead, drive_result['url'])
 
         return {
             'success': True,
